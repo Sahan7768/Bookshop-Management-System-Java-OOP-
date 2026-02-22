@@ -1,6 +1,5 @@
 import javax.swing.*;
 import javax.swing.table.*;
-import javax.swing.border.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.*;
@@ -8,11 +7,10 @@ import java.io.*;
 import java.util.*;
 import java.util.List;
 
-// ============================================================
-// ABSTRACT BASE CLASS - Demonstrates ABSTRACTION
-// ============================================================
+// =====================================================
+// ABSTRACT CLASS - Person (Base class for all users)
+// =====================================================
 abstract class Person implements Serializable {
-    private static final long serialVersionUID = 1L;
     private String username;
     private String password;
     private String fullName;
@@ -23,6 +21,7 @@ abstract class Person implements Serializable {
         this.fullName = fullName;
     }
 
+    // Getters and Setters
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
     public String getPassword() { return password; }
@@ -30,65 +29,52 @@ abstract class Person implements Serializable {
     public String getFullName() { return fullName; }
     public void setFullName(String fullName) { this.fullName = fullName; }
 
+    // Abstract method - each subclass must define its role
     public abstract String getRole();
-
-    @Override
-    public String toString() {
-        return fullName + " (" + getRole() + ")";
-    }
 
     public String displayInfo() {
         return "Name: " + fullName + " | Role: " + getRole();
     }
+
+    public String toString() {
+        return fullName + " (" + getRole() + ")";
+    }
 }
 
-// ============================================================
-// INHERITANCE - Cashier extends Person
-// ============================================================
+// =====================================================
+// CASHIER CLASS - Inherits from Person
+// =====================================================
 class Cashier extends Person {
-    private static final long serialVersionUID = 1L;
-
     public Cashier(String username, String password, String fullName) {
         super(username, password, fullName);
     }
 
-    @Override
-    public String getRole() {
-        return "Cashier";
-    }
+    public String getRole() { return "Cashier"; }
 
-    @Override
     public String displayInfo() {
         return super.displayInfo() + " | Access: View & Search Books";
     }
 }
 
-// ============================================================
-// INHERITANCE - Manager extends Person
-// ============================================================
+// =====================================================
+// MANAGER CLASS - Inherits from Person
+// =====================================================
 class Manager extends Person {
-    private static final long serialVersionUID = 1L;
-
     public Manager(String username, String password, String fullName) {
         super(username, password, fullName);
     }
 
-    @Override
-    public String getRole() {
-        return "Manager";
-    }
+    public String getRole() { return "Manager"; }
 
-    @Override
     public String displayInfo() {
         return super.displayInfo() + " | Access: Full Control";
     }
 }
 
-// ============================================================
-// ENCAPSULATION - Book class with private fields
-// ============================================================
+// =====================================================
+// BOOK CLASS - Represents a book in the shop
+// =====================================================
 class Book implements Serializable {
-    private static final long serialVersionUID = 1L;
     private String bookId;
     private String title;
     private String author;
@@ -105,6 +91,7 @@ class Book implements Serializable {
         this.stockQuantity = stockQuantity;
     }
 
+    // Getters and Setters
     public String getBookId() { return bookId; }
     public void setBookId(String bookId) { this.bookId = bookId; }
     public String getTitle() { return title; }
@@ -118,21 +105,18 @@ class Book implements Serializable {
     public int getStockQuantity() { return stockQuantity; }
     public void setStockQuantity(int stockQuantity) { this.stockQuantity = stockQuantity; }
 
-    public String toFileString() {
+    // Convert to CSV line
+    public String toCSV() {
         return bookId + "," + title + "," + author + "," + category + "," + price + "," + stockQuantity;
     }
 
-    @Override
-    public String toString() {
-        return title + " by " + author;
-    }
+    public String toString() { return title + " by " + author; }
 }
 
-// ============================================================
-// ENCAPSULATION - Category class
-// ============================================================
+// =====================================================
+// CATEGORY CLASS - Represents a book category
+// =====================================================
 class Category implements Serializable {
-    private static final long serialVersionUID = 1L;
     private String categoryId;
     private String categoryName;
     private String description;
@@ -143,6 +127,7 @@ class Category implements Serializable {
         this.description = description;
     }
 
+    // Getters and Setters
     public String getCategoryId() { return categoryId; }
     public void setCategoryId(String categoryId) { this.categoryId = categoryId; }
     public String getCategoryName() { return categoryName; }
@@ -150,47 +135,40 @@ class Category implements Serializable {
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
 
-    public String toFileString() {
+    // Convert to CSV line
+    public String toCSV() {
         return categoryId + "," + categoryName + "," + description;
     }
 
-    @Override
-    public String toString() {
-        return categoryName;
-    }
+    public String toString() { return categoryName; }
 }
 
-// ============================================================
-// INTERFACE - Demonstrates ABSTRACTION
-// ============================================================
+// =====================================================
+// INTERFACE - Contract for file operations
+// =====================================================
 interface FileOperations {
     void saveToFile();
     void loadFromFile();
 }
 
-// ============================================================
-// Data Manager - Implements Interface (ABSTRACTION)
-// ============================================================
+// =====================================================
+// DATA MANAGER - Handles all data and file operations
+// =====================================================
 class DataManager implements FileOperations {
-    private List<Person> users;
-    private List<Book> books;
-    private List<Category> categories;
-    private static final String USERS_FILE = "users.csv";
-    private static final String BOOKS_FILE = "books.csv";
-    private static final String CATEGORIES_FILE = "categories.csv";
+    private List<Person> users = new ArrayList<>();
+    private List<Book> books = new ArrayList<>();
+    private List<Category> categories = new ArrayList<>();
 
     public DataManager() {
-        users = new ArrayList<>();
-        books = new ArrayList<>();
-        categories = new ArrayList<>();
         loadFromFile();
         if (users.isEmpty()) {
-            initializeDefaultData();
+            loadDefaultData();
             saveToFile();
         }
     }
 
-    private void initializeDefaultData() {
+    // Load sample data for first run
+    private void loadDefaultData() {
         users.add(new Manager("manager", "manager123", "John Smith"));
         users.add(new Cashier("cashier", "cashier123", "Jane Doe"));
 
@@ -212,227 +190,161 @@ class DataManager implements FileOperations {
         books.add(new Book("BK010", "Charlotte's Web", "E.B. White", "Children", 750.00, 45));
     }
 
-    @Override
+    // ----- FILE SAVE METHODS -----
     public void saveToFile() {
-        saveUsersToFile();
-        saveBooksToFile();
-        saveCategoriesToFile();
+        // Save users
+        try (PrintWriter w = new PrintWriter(new FileWriter("users.csv"))) {
+            w.println("Role,Username,Password,FullName");
+            for (Person u : users)
+                w.println(u.getRole() + "," + u.getUsername() + "," + u.getPassword() + "," + u.getFullName());
+        } catch (IOException e) { System.out.println("Error saving users: " + e.getMessage()); }
+
+        // Save books
+        try (PrintWriter w = new PrintWriter(new FileWriter("books.csv"))) {
+            w.println("BookID,Title,Author,Category,Price,StockQuantity");
+            for (Book b : books) w.println(b.toCSV());
+        } catch (IOException e) { System.out.println("Error saving books: " + e.getMessage()); }
+
+        // Save categories
+        try (PrintWriter w = new PrintWriter(new FileWriter("categories.csv"))) {
+            w.println("CategoryID,CategoryName,Description");
+            for (Category c : categories) w.println(c.toCSV());
+        } catch (IOException e) { System.out.println("Error saving categories: " + e.getMessage()); }
     }
 
-    @Override
+    // ----- FILE LOAD METHODS -----
     public void loadFromFile() {
-        loadUsersFromFile();
-        loadBooksFromFile();
-        loadCategoriesFromFile();
-    }
-
-    private void saveUsersToFile() {
-        try (PrintWriter writer = new PrintWriter(new FileWriter(USERS_FILE))) {
-            writer.println("Role,Username,Password,FullName");
-            for (Person user : users) {
-                writer.println(user.getRole() + "," + user.getUsername() + "," + user.getPassword() + "," + user.getFullName());
-            }
-        } catch (IOException e) {
-            System.out.println("Error saving users: " + e.getMessage());
-        }
-    }
-
-    private void loadUsersFromFile() {
-        File file = new File(USERS_FILE);
-        if (!file.exists()) return;
-        try (Scanner scanner = new Scanner(file)) {
-            if (scanner.hasNextLine()) scanner.nextLine(); // skip CSV header
-            while (scanner.hasNextLine()) {
-                String line = scanner.nextLine().trim();
-                if (line.isEmpty()) continue;
-                String[] parts = line.split(",", 4);
-                if (parts.length == 4) {
-                    if (parts[0].equals("Manager")) {
-                        users.add(new Manager(parts[1], parts[2], parts[3]));
-                    } else {
-                        users.add(new Cashier(parts[1], parts[2], parts[3]));
+        // Load users
+        File userFile = new File("users.csv");
+        if (userFile.exists()) {
+            try (Scanner sc = new Scanner(userFile)) {
+                if (sc.hasNextLine()) sc.nextLine(); // skip header
+                while (sc.hasNextLine()) {
+                    String[] p = sc.nextLine().trim().split(",", 4);
+                    if (p.length == 4) {
+                        if (p[0].equals("Manager")) users.add(new Manager(p[1], p[2], p[3]));
+                        else users.add(new Cashier(p[1], p[2], p[3]));
                     }
                 }
-            }
-        } catch (IOException e) {
-            System.out.println("Error loading users: " + e.getMessage());
+            } catch (IOException e) { System.out.println("Error loading users: " + e.getMessage()); }
         }
-    }
 
-    private void saveBooksToFile() {
-        try (PrintWriter writer = new PrintWriter(new FileWriter(BOOKS_FILE))) {
-            writer.println("BookID,Title,Author,Category,Price,StockQuantity");
-            for (Book book : books) {
-                writer.println(book.toFileString());
-            }
-        } catch (IOException e) {
-            System.out.println("Error saving books: " + e.getMessage());
-        }
-    }
-
-    private void loadBooksFromFile() {
-        File file = new File(BOOKS_FILE);
-        if (!file.exists()) return;
-        try (Scanner scanner = new Scanner(file)) {
-            if (scanner.hasNextLine()) scanner.nextLine(); // skip CSV header
-            while (scanner.hasNextLine()) {
-                String line = scanner.nextLine().trim();
-                if (line.isEmpty()) continue;
-                String[] parts = line.split(",", 6);
-                if (parts.length == 6) {
-                    books.add(new Book(parts[0], parts[1], parts[2], parts[3],
-                            Double.parseDouble(parts[4]), Integer.parseInt(parts[5])));
+        // Load books
+        File bookFile = new File("books.csv");
+        if (bookFile.exists()) {
+            try (Scanner sc = new Scanner(bookFile)) {
+                if (sc.hasNextLine()) sc.nextLine(); // skip header
+                while (sc.hasNextLine()) {
+                    String[] p = sc.nextLine().trim().split(",", 6);
+                    if (p.length == 6)
+                        books.add(new Book(p[0], p[1], p[2], p[3], Double.parseDouble(p[4]), Integer.parseInt(p[5])));
                 }
-            }
-        } catch (IOException e) {
-            System.out.println("Error loading books: " + e.getMessage());
+            } catch (IOException e) { System.out.println("Error loading books: " + e.getMessage()); }
         }
-    }
 
-    private void saveCategoriesToFile() {
-        try (PrintWriter writer = new PrintWriter(new FileWriter(CATEGORIES_FILE))) {
-            writer.println("CategoryID,CategoryName,Description");
-            for (Category cat : categories) {
-                writer.println(cat.toFileString());
-            }
-        } catch (IOException e) {
-            System.out.println("Error saving categories: " + e.getMessage());
-        }
-    }
-
-    private void loadCategoriesFromFile() {
-        File file = new File(CATEGORIES_FILE);
-        if (!file.exists()) return;
-        try (Scanner scanner = new Scanner(file)) {
-            if (scanner.hasNextLine()) scanner.nextLine(); // skip CSV header
-            while (scanner.hasNextLine()) {
-                String line = scanner.nextLine().trim();
-                if (line.isEmpty()) continue;
-                String[] parts = line.split(",", 3);
-                if (parts.length == 3) {
-                    categories.add(new Category(parts[0], parts[1], parts[2]));
+        // Load categories
+        File catFile = new File("categories.csv");
+        if (catFile.exists()) {
+            try (Scanner sc = new Scanner(catFile)) {
+                if (sc.hasNextLine()) sc.nextLine(); // skip header
+                while (sc.hasNextLine()) {
+                    String[] p = sc.nextLine().trim().split(",", 3);
+                    if (p.length == 3) categories.add(new Category(p[0], p[1], p[2]));
                 }
-            }
-        } catch (IOException e) {
-            System.out.println("Error loading categories: " + e.getMessage());
+            } catch (IOException e) { System.out.println("Error loading categories: " + e.getMessage()); }
         }
     }
 
+    // ----- USER OPERATIONS -----
     public Person authenticate(String username, String password) {
         for (Person user : users) {
-            if (user.getUsername().equals(username) && user.getPassword().equals(password)) {
+            if (user.getUsername().equals(username) && user.getPassword().equals(password))
                 return user;
-            }
         }
         return null;
     }
 
     public boolean addUser(Person user) {
-        for (Person existingUser : users) {
-            if (existingUser.getUsername().equals(user.getUsername())) {
-                return false;
-            }
+        for (Person existing : users) {
+            if (existing.getUsername().equals(user.getUsername())) return false;
         }
         users.add(user);
         saveToFile();
         return true;
     }
 
-    public void addBook(Book book) {
-        books.add(book);
-        saveToFile();
-    }
-
-    public void addCategory(Category category) {
-        categories.add(category);
-        saveToFile();
-    }
-
-    public List<Book> getAllBooks() { return books; }
-    public List<Category> getAllCategories() { return categories; }
-    public List<Person> getAllUsers() { return users; }
-
-    public List<Book> searchByCategory(String category) {
-        List<Book> result = new ArrayList<>();
-        for (Book book : books) {
-            if (book.getCategory().toLowerCase().contains(category.toLowerCase())) {
-                result.add(book);
-            }
-        }
-        return result;
-    }
+    // ----- BOOK OPERATIONS -----
+    public void addBook(Book book) { books.add(book); saveToFile(); }
 
     public List<Book> searchByName(String name) {
         List<Book> result = new ArrayList<>();
-        for (Book book : books) {
-            if (book.getTitle().toLowerCase().contains(name.toLowerCase())) {
-                result.add(book);
-            }
-        }
+        for (Book b : books)
+            if (b.getTitle().toLowerCase().contains(name.toLowerCase())) result.add(b);
+        return result;
+    }
+
+    public List<Book> searchByCategory(String category) {
+        List<Book> result = new ArrayList<>();
+        for (Book b : books)
+            if (b.getCategory().toLowerCase().contains(category.toLowerCase())) result.add(b);
         return result;
     }
 
     public List<Book> searchByPrice(double maxPrice) {
         List<Book> result = new ArrayList<>();
-        for (Book book : books) {
-            if (book.getPrice() <= maxPrice) {
-                result.add(book);
-            }
-        }
+        for (Book b : books)
+            if (b.getPrice() <= maxPrice) result.add(b);
         return result;
     }
 
     public List<Book> searchByStock(int minStock) {
         List<Book> result = new ArrayList<>();
-        for (Book book : books) {
-            if (book.getStockQuantity() >= minStock) {
-                result.add(book);
-            }
-        }
+        for (Book b : books)
+            if (b.getStockQuantity() >= minStock) result.add(b);
         return result;
     }
 
+    // ----- CATEGORY OPERATIONS -----
+    public void addCategory(Category cat) { categories.add(cat); saveToFile(); }
+
+    // ----- GETTERS -----
+    public List<Book> getAllBooks() { return books; }
+    public List<Category> getAllCategories() { return categories; }
+    public List<Person> getAllUsers() { return users; }
+
+    // ----- ID GENERATORS -----
     public String generateBookId() {
         int max = 0;
-        for (Book book : books) {
-            String num = book.getBookId().replace("BK", "");
-            try {
-                int n = Integer.parseInt(num);
-                if (n > max) max = n;
-            } catch (NumberFormatException e) { }
+        for (Book b : books) {
+            try { int n = Integer.parseInt(b.getBookId().replace("BK", "")); if (n > max) max = n; }
+            catch (NumberFormatException e) {}
         }
         return String.format("BK%03d", max + 1);
     }
 
     public String generateCategoryId() {
         int max = 0;
-        for (Category cat : categories) {
-            String num = cat.getCategoryId().replace("CAT", "");
-            try {
-                int n = Integer.parseInt(num);
-                if (n > max) max = n;
-            } catch (NumberFormatException e) { }
+        for (Category c : categories) {
+            try { int n = Integer.parseInt(c.getCategoryId().replace("CAT", "")); if (n > max) max = n; }
+            catch (NumberFormatException e) {}
         }
         return String.format("CAT%03d", max + 1);
     }
 }
 
-// ============================================================
-// Custom Rounded Button
-// ============================================================
+// =====================================================
+// ROUNDED BUTTON - Custom styled button
+// =====================================================
 class RoundedButton extends JButton {
-    private Color backgroundColor;
-    private Color hoverColor;
-    private Color pressColor;
-    private boolean isHovered = false;
-    private boolean isPressed = false;
-    private int radius = 15;
+    private Color bgColor, hoverColor, pressColor;
+    private boolean hovered = false, pressed = false;
 
     public RoundedButton(String text, Color bgColor) {
         super(text);
-        this.backgroundColor = bgColor;
+        this.bgColor = bgColor;
         this.hoverColor = bgColor.brighter();
         this.pressColor = bgColor.darker();
+
         setContentAreaFilled(false);
         setFocusPainted(false);
         setBorderPainted(false);
@@ -442,42 +354,35 @@ class RoundedButton extends JButton {
         setPreferredSize(new Dimension(180, 45));
 
         addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) { isHovered = true; repaint(); }
-            @Override
-            public void mouseExited(MouseEvent e) { isHovered = false; isPressed = false; repaint(); }
-            @Override
-            public void mousePressed(MouseEvent e) { isPressed = true; repaint(); }
-            @Override
-            public void mouseReleased(MouseEvent e) { isPressed = false; repaint(); }
+            public void mouseEntered(MouseEvent e) { hovered = true; repaint(); }
+            public void mouseExited(MouseEvent e) { hovered = false; pressed = false; repaint(); }
+            public void mousePressed(MouseEvent e) { pressed = true; repaint(); }
+            public void mouseReleased(MouseEvent e) { pressed = false; repaint(); }
         });
     }
 
-    @Override
     protected void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        Color currentColor = backgroundColor;
-        if (isPressed) currentColor = pressColor;
-        else if (isHovered) currentColor = hoverColor;
+        // Pick color based on state
+        Color color = pressed ? pressColor : (hovered ? hoverColor : bgColor);
+        g2.setColor(color);
+        g2.fill(new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), 15, 15));
 
-        g2.setColor(currentColor);
-        g2.fill(new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), radius, radius));
-
+        // Draw text centered
         g2.setColor(getForeground());
         g2.setFont(getFont());
         FontMetrics fm = g2.getFontMetrics();
-        int x = (getWidth() - fm.stringWidth(getText())) / 2;
-        int y = (getHeight() + fm.getAscent() - fm.getDescent()) / 2;
-        g2.drawString(getText(), x, y);
+        g2.drawString(getText(), (getWidth() - fm.stringWidth(getText())) / 2,
+                (getHeight() + fm.getAscent() - fm.getDescent()) / 2);
         g2.dispose();
     }
 }
 
-// ============================================================
-// Custom Rounded Panel
-// ============================================================
+// =====================================================
+// ROUNDED PANEL - Panel with rounded corners
+// =====================================================
 class RoundedPanel extends JPanel {
     private int radius;
     private Color bgColor;
@@ -488,7 +393,6 @@ class RoundedPanel extends JPanel {
         setOpaque(false);
     }
 
-    @Override
     protected void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -499,69 +403,61 @@ class RoundedPanel extends JPanel {
     }
 }
 
-// ============================================================
+// =====================================================
 // MAIN APPLICATION CLASS
-// ============================================================
+// =====================================================
 public class CityBookshop extends JFrame {
 
-    private static final Color PRIMARY_DARK = new Color(27, 38, 59);
-    private static final Color PRIMARY_MID = new Color(65, 90, 119);
-    private static final Color PRIMARY_LIGHT = new Color(119, 141, 169);
-    private static final Color ACCENT_BLUE = new Color(52, 152, 219);
-    private static final Color ACCENT_GREEN = new Color(39, 174, 96);
-    private static final Color ACCENT_ORANGE = new Color(243, 156, 18);
-    private static final Color ACCENT_RED = new Color(231, 76, 60);
-    private static final Color ACCENT_PURPLE = new Color(142, 68, 173);
-    private static final Color BG_WHITE = new Color(236, 240, 241);
-    private static final Color CARD_WHITE = new Color(255, 255, 255);
-    private static final Color TEXT_DARK = new Color(44, 62, 80);
-    private static final Color TEXT_LIGHT = new Color(149, 165, 166);
-    private static final Color SIDEBAR_COLOR = new Color(30, 39, 46);
-    private static final Color SIDEBAR_HOVER = new Color(47, 54, 64);
-    private static final Color TABLE_HEADER_BG = new Color(41, 128, 185);
-    private static final Color TABLE_HEADER_FG = Color.WHITE;
+    // ---- COLOR CONSTANTS ----
+    static final Color DARK_BG = new Color(27, 38, 59);
+    static final Color BLUE = new Color(52, 152, 219);
+    static final Color GREEN = new Color(39, 174, 96);
+    static final Color ORANGE = new Color(243, 156, 18);
+    static final Color RED = new Color(231, 76, 60);
+    static final Color PURPLE = new Color(142, 68, 173);
+    static final Color LIGHT_BG = new Color(236, 240, 241);
+    static final Color WHITE = new Color(255, 255, 255);
+    static final Color TEXT = new Color(44, 62, 80);
+    static final Color GRAY_TEXT = new Color(149, 165, 166);
+    static final Color SIDEBAR = new Color(30, 39, 46);
+    static final Color SIDEBAR_HL = new Color(47, 54, 64);
+    static final Color HEADER_BLUE = new Color(41, 128, 185);
 
-    private DataManager dataManager;
+    private DataManager data;
     private Person currentUser;
     private JPanel mainPanel;
-    private CardLayout cardLayout;
+    private CardLayout mainLayout;
 
+    // ---- CONSTRUCTOR ----
     public CityBookshop() {
-        dataManager = new DataManager();
-        initializeUI();
-    }
+        data = new DataManager();
 
-    private void initializeUI() {
         setTitle("City Bookshop Management System");
         setSize(1200, 750);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setMinimumSize(new Dimension(1100, 700));
 
-        cardLayout = new CardLayout();
-        mainPanel = new JPanel(cardLayout);
-        mainPanel.add(createLoginPanel(), "LOGIN");
+        mainLayout = new CardLayout();
+        mainPanel = new JPanel(mainLayout);
+        mainPanel.add(buildLoginPanel(), "LOGIN");
         add(mainPanel);
-        cardLayout.show(mainPanel, "LOGIN");
+
         setVisible(true);
     }
 
-    // ============================================================
-    // LOGIN PANEL
-    // ============================================================
-    private JPanel createLoginPanel() {
+    // ==========================================================
+    //                     LOGIN SCREEN
+    // ==========================================================
+    private JPanel buildLoginPanel() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(PRIMARY_DARK);
 
-        JPanel leftPanel = new JPanel() {
-            @Override
+        // ---- LEFT SIDE (Decorative) ----
+        JPanel left = new JPanel() {
             protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
                 Graphics2D g2 = (Graphics2D) g;
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                GradientPaint gp = new GradientPaint(0, 0, new Color(52, 152, 219),
-                        0, getHeight(), new Color(142, 68, 173));
-                g2.setPaint(gp);
+                g2.setPaint(new GradientPaint(0, 0, BLUE, 0, getHeight(), PURPLE));
                 g2.fillRect(0, 0, getWidth(), getHeight());
 
                 g2.setColor(new Color(255, 255, 255, 40));
@@ -570,289 +466,922 @@ public class CityBookshop extends JFrame {
 
                 g2.setColor(Color.WHITE);
                 g2.setFont(new Font("Segoe UI", Font.BOLD, 42));
-                FontMetrics fm = g2.getFontMetrics();
-                String title = "City Bookshop";
-                int x = (getWidth() - fm.stringWidth(title)) / 2;
-                g2.drawString(title, x, getHeight() / 2 - 40);
-
+                drawCentered(g2, "City Bookshop", getWidth(), getHeight() / 2 - 40);
                 g2.setFont(new Font("Segoe UI", Font.PLAIN, 18));
-                fm = g2.getFontMetrics();
-                String sub = "Management System";
-                x = (getWidth() - fm.stringWidth(sub)) / 2;
-                g2.drawString(sub, x, getHeight() / 2);
-
+                drawCentered(g2, "Management System", getWidth(), getHeight() / 2);
                 g2.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-                fm = g2.getFontMetrics();
-                String tagline = "Automate your bookshop transactions";
-                x = (getWidth() - fm.stringWidth(tagline)) / 2;
-                g2.drawString(tagline, x, getHeight() / 2 + 40);
+                drawCentered(g2, "Automate your bookshop transactions", getWidth(), getHeight() / 2 + 40);
             }
         };
-        leftPanel.setPreferredSize(new Dimension(450, 0));
+        left.setPreferredSize(new Dimension(450, 0));
 
-        JPanel rightPanel = new JPanel(new GridBagLayout());
-        rightPanel.setBackground(CARD_WHITE);
+        // ---- RIGHT SIDE (Login Form) ----
+        JPanel right = new JPanel(new GridBagLayout());
+        right.setBackground(WHITE);
 
-        RoundedPanel loginCard = new RoundedPanel(25, CARD_WHITE);
-        loginCard.setLayout(new BoxLayout(loginCard, BoxLayout.Y_AXIS));
-        loginCard.setBorder(BorderFactory.createEmptyBorder(40, 50, 40, 50));
-        loginCard.setPreferredSize(new Dimension(400, 520));
+        JPanel card = new JPanel();
+        card.setBackground(WHITE);
+        card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
+        card.setBorder(BorderFactory.createEmptyBorder(40, 50, 40, 50));
 
-        JLabel loginTitle = new JLabel("Welcome Back!");
-        loginTitle.setFont(new Font("Segoe UI", Font.BOLD, 28));
-        loginTitle.setForeground(TEXT_DARK);
-        loginTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
-        loginCard.add(loginTitle);
-        loginCard.add(Box.createVerticalStrut(5));
+        // Title
+        addCenteredLabel(card, "Welcome Back!", new Font("Segoe UI", Font.BOLD, 28), TEXT);
+        addCenteredLabel(card, "Sign in to your account", new Font("Segoe UI", Font.PLAIN, 14), GRAY_TEXT);
+        card.add(Box.createVerticalStrut(30));
 
-        JLabel loginSubtitle = new JLabel("Sign in to your account");
-        loginSubtitle.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        loginSubtitle.setForeground(TEXT_LIGHT);
-        loginSubtitle.setAlignmentX(Component.CENTER_ALIGNMENT);
-        loginCard.add(loginSubtitle);
-        loginCard.add(Box.createVerticalStrut(30));
+        // Username
+        addFieldLabel(card, "Username");
+        JTextField userField = createTextField();
+        card.add(userField);
+        card.add(Box.createVerticalStrut(15));
 
-        JLabel userLabel = new JLabel("  Username");
-        userLabel.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        userLabel.setForeground(TEXT_DARK);
-        userLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        userLabel.setMaximumSize(new Dimension(300, 20));
-        loginCard.add(userLabel);
-        loginCard.add(Box.createVerticalStrut(5));
+        // Password
+        addFieldLabel(card, "Password");
+        JPasswordField passField = new JPasswordField();
+        styleTextField(passField);
+        card.add(passField);
+        card.add(Box.createVerticalStrut(25));
 
-        JTextField usernameField = new JTextField();
-        usernameField.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        usernameField.setMaximumSize(new Dimension(300, 42));
-        usernameField.setPreferredSize(new Dimension(300, 42));
-        usernameField.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(200, 200, 200), 1, true),
-                BorderFactory.createEmptyBorder(5, 15, 5, 15)));
-        loginCard.add(usernameField);
-        loginCard.add(Box.createVerticalStrut(15));
-
-        JLabel passLabel = new JLabel("  Password");
-        passLabel.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        passLabel.setForeground(TEXT_DARK);
-        passLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        passLabel.setMaximumSize(new Dimension(300, 20));
-        loginCard.add(passLabel);
-        loginCard.add(Box.createVerticalStrut(5));
-
-        JPasswordField passwordField = new JPasswordField();
-        passwordField.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        passwordField.setMaximumSize(new Dimension(300, 42));
-        passwordField.setPreferredSize(new Dimension(300, 42));
-        passwordField.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(200, 200, 200), 1, true),
-                BorderFactory.createEmptyBorder(5, 15, 5, 15)));
-        loginCard.add(passwordField);
-        loginCard.add(Box.createVerticalStrut(25));
-
-        RoundedButton loginBtn = new RoundedButton("Sign In", ACCENT_BLUE);
+        // Login button
+        RoundedButton loginBtn = new RoundedButton("Sign In", BLUE);
         loginBtn.setMaximumSize(new Dimension(300, 45));
         loginBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
-        loginCard.add(loginBtn);
-        loginCard.add(Box.createVerticalStrut(25));
+        card.add(loginBtn);
+        card.add(Box.createVerticalStrut(25));
 
-        JPanel demoPanel = new RoundedPanel(15, new Color(232, 245, 233));
-        demoPanel.setLayout(new BoxLayout(demoPanel, BoxLayout.Y_AXIS));
-        demoPanel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
-        demoPanel.setMaximumSize(new Dimension(300, 140));
-        demoPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        // Demo credentials box
+        JPanel demoBox = new RoundedPanel(15, new Color(232, 245, 233));
+        demoBox.setLayout(new BoxLayout(demoBox, BoxLayout.Y_AXIS));
+        demoBox.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
+        demoBox.setMaximumSize(new Dimension(300, 120));
+        demoBox.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         JLabel demoTitle = new JLabel("Demo Credentials");
         demoTitle.setFont(new Font("Segoe UI", Font.BOLD, 13));
         demoTitle.setForeground(new Color(27, 94, 32));
-        demoTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
-        demoPanel.add(demoTitle);
-        demoPanel.add(Box.createVerticalStrut(8));
+        demoBox.add(demoTitle);
+        demoBox.add(Box.createVerticalStrut(8));
 
-        JLabel managerCred = new JLabel("Manager  :  manager / manager123");
-        managerCred.setFont(new Font("Segoe UI Semibold", Font.PLAIN, 12));
-        managerCred.setForeground(new Color(56, 142, 60));
-        managerCred.setAlignmentX(Component.LEFT_ALIGNMENT);
-        demoPanel.add(managerCred);
-        demoPanel.add(Box.createVerticalStrut(4));
+        JLabel mgr = new JLabel("Manager  :  manager / manager123");
+        mgr.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        mgr.setForeground(new Color(56, 142, 60));
+        demoBox.add(mgr);
+        demoBox.add(Box.createVerticalStrut(4));
 
-        JLabel cashierCred = new JLabel("Cashier    :  cashier / cashier123");
-        cashierCred.setFont(new Font("Segoe UI Semibold", Font.PLAIN, 12));
-        cashierCred.setForeground(new Color(56, 142, 60));
-        cashierCred.setAlignmentX(Component.LEFT_ALIGNMENT);
-        demoPanel.add(cashierCred);
+        JLabel csh = new JLabel("Cashier    :  cashier / cashier123");
+        csh.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        csh.setForeground(new Color(56, 142, 60));
+        demoBox.add(csh);
 
-        loginCard.add(demoPanel);
+        card.add(demoBox);
+        right.add(card);
 
-        rightPanel.add(loginCard);
-
+        // ---- LOGIN ACTION ----
         ActionListener loginAction = e -> {
-            String username = usernameField.getText().trim();
-            String password = new String(passwordField.getPassword()).trim();
+            String user = userField.getText().trim();
+            String pass = new String(passField.getPassword()).trim();
 
-            if (username.isEmpty() || password.isEmpty()) {
-                showStyledMessage("Please enter both username and password.", "Input Required", JOptionPane.WARNING_MESSAGE);
+            if (user.isEmpty() || pass.isEmpty()) {
+                showMsg("Please enter both username and password.", "Input Required", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
-            Person user = dataManager.authenticate(username, password);
-            if (user != null) {
-                currentUser = user;
-                mainPanel.add(createDashboardPanel(), "DASHBOARD");
-                cardLayout.show(mainPanel, "DASHBOARD");
-                usernameField.setText("");
-                passwordField.setText("");
+            Person p = data.authenticate(user, pass);
+            if (p != null) {
+                currentUser = p;
+                mainPanel.add(buildDashboard(), "DASHBOARD");
+                mainLayout.show(mainPanel, "DASHBOARD");
+                userField.setText("");
+                passField.setText("");
             } else {
-                showStyledMessage("Invalid username or password!", "Login Failed", JOptionPane.ERROR_MESSAGE);
-                passwordField.setText("");
+                showMsg("Invalid username or password!", "Login Failed", JOptionPane.ERROR_MESSAGE);
+                passField.setText("");
             }
         };
 
         loginBtn.addActionListener(loginAction);
-        passwordField.addActionListener(loginAction);
-        usernameField.addActionListener(loginAction);
+        passField.addActionListener(loginAction);
+        userField.addActionListener(loginAction);
 
-        panel.add(leftPanel, BorderLayout.WEST);
-        panel.add(rightPanel, BorderLayout.CENTER);
-
+        panel.add(left, BorderLayout.WEST);
+        panel.add(right, BorderLayout.CENTER);
         return panel;
     }
 
-    // ============================================================
-    // DASHBOARD PANEL
-    // ============================================================
-    private JPanel createDashboardPanel() {
+    // ==========================================================
+    //                     DASHBOARD
+    // ==========================================================
+    private JPanel buildDashboard() {
         JPanel panel = new JPanel(new BorderLayout());
 
-        JPanel sidebar = createSidebar();
-        panel.add(sidebar, BorderLayout.WEST);
-
+        // Content area
         CardLayout contentLayout = new CardLayout();
         JPanel contentPanel = new JPanel(contentLayout);
-        contentPanel.setBackground(BG_WHITE);
+        contentPanel.setBackground(LIGHT_BG);
 
-        contentPanel.add(createHomeContent(), "HOME");
-        contentPanel.add(createViewBooksContent(), "VIEW_BOOKS");
-        contentPanel.add(createSearchBooksContent(), "SEARCH_BOOKS");
+        // Add all pages
+        contentPanel.add(buildHomePage(), "HOME");
+        contentPanel.add(buildViewBooksPage(), "VIEW_BOOKS");
+        contentPanel.add(buildSearchPage(), "SEARCH_BOOKS");
 
         if (currentUser instanceof Manager) {
-            contentPanel.add(createAddBookContent(), "ADD_BOOK");
-            contentPanel.add(createAddCategoryContent(), "ADD_CATEGORY");
-            contentPanel.add(createCreateAccountContent(), "CREATE_ACCOUNT");
+            contentPanel.add(buildAddBookPage(), "ADD_BOOK");
+            contentPanel.add(buildAddCategoryPage(), "ADD_CATEGORY");
+            contentPanel.add(buildCreateAccountPage(), "CREATE_ACCOUNT");
         }
 
-        contentLayout.show(contentPanel, "HOME");
+        // Sidebar
+        JPanel sidebar = buildSidebar(contentPanel, contentLayout);
+        panel.add(sidebar, BorderLayout.WEST);
         panel.add(contentPanel, BorderLayout.CENTER);
-
-        panel.putClientProperty("contentPanel", contentPanel);
-        panel.putClientProperty("contentLayout", contentLayout);
 
         return panel;
     }
 
-    private JPanel createSidebar() {
+    // ---- SIDEBAR ----
+    private JPanel buildSidebar(JPanel contentPanel, CardLayout contentLayout) {
         JPanel sidebar = new JPanel();
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
-        sidebar.setBackground(SIDEBAR_COLOR);
+        sidebar.setBackground(SIDEBAR);
         sidebar.setPreferredSize(new Dimension(250, 0));
-        sidebar.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
 
-        JPanel profilePanel = new JPanel();
-        profilePanel.setLayout(new BoxLayout(profilePanel, BoxLayout.Y_AXIS));
-        profilePanel.setBackground(new Color(22, 29, 38));
-        profilePanel.setBorder(BorderFactory.createEmptyBorder(25, 20, 25, 20));
-        profilePanel.setMaximumSize(new Dimension(250, 130));
+        // Profile section
+        JPanel profile = new JPanel();
+        profile.setLayout(new BoxLayout(profile, BoxLayout.Y_AXIS));
+        profile.setBackground(new Color(22, 29, 38));
+        profile.setBorder(BorderFactory.createEmptyBorder(25, 20, 25, 20));
+        profile.setMaximumSize(new Dimension(250, 130));
 
-        JLabel shopLabel = new JLabel("City Bookshop");
-        shopLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        shopLabel.setForeground(Color.WHITE);
-        shopLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        profilePanel.add(shopLabel);
-        profilePanel.add(Box.createVerticalStrut(15));
+        JLabel shopName = new JLabel("City Bookshop");
+        shopName.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        shopName.setForeground(Color.WHITE);
+        profile.add(shopName);
+        profile.add(Box.createVerticalStrut(15));
 
-        JLabel nameLabel = new JLabel(currentUser.getFullName());
-        nameLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        nameLabel.setForeground(new Color(200, 200, 200));
-        nameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        profilePanel.add(nameLabel);
-        profilePanel.add(Box.createVerticalStrut(5));
+        JLabel userName = new JLabel(currentUser.getFullName());
+        userName.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        userName.setForeground(new Color(200, 200, 200));
+        profile.add(userName);
+        profile.add(Box.createVerticalStrut(5));
 
-        JLabel roleLabel = new JLabel("Role: " + currentUser.getRole());
-        roleLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        roleLabel.setForeground(ACCENT_BLUE);
-        roleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        profilePanel.add(roleLabel);
+        JLabel userRole = new JLabel("Role: " + currentUser.getRole());
+        userRole.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        userRole.setForeground(BLUE);
+        profile.add(userRole);
 
-        sidebar.add(profilePanel);
+        sidebar.add(profile);
         sidebar.add(Box.createVerticalStrut(10));
+        addSeparator(sidebar);
 
-        JSeparator sep = new JSeparator();
-        sep.setMaximumSize(new Dimension(250, 1));
-        sep.setForeground(new Color(60, 70, 80));
-        sidebar.add(sep);
-        sidebar.add(Box.createVerticalStrut(10));
-
-        JLabel menuLabel = new JLabel("   MENU");
-        menuLabel.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        menuLabel.setForeground(new Color(120, 130, 140));
-        menuLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        sidebar.add(menuLabel);
-        sidebar.add(Box.createVerticalStrut(5));
-
-        addSidebarButton(sidebar, "Dashboard", "HOME");
-        addSidebarButton(sidebar, "View All Books", "VIEW_BOOKS");
-        addSidebarButton(sidebar, "Search Books", "SEARCH_BOOKS");
+        // Menu section
+        addMenuLabel(sidebar, "MENU");
+        addNavButton(sidebar, "Dashboard", "HOME", contentPanel, contentLayout);
+        addNavButton(sidebar, "View All Books", "VIEW_BOOKS", contentPanel, contentLayout);
+        addNavButton(sidebar, "Search Books", "SEARCH_BOOKS", contentPanel, contentLayout);
 
         if (currentUser instanceof Manager) {
             sidebar.add(Box.createVerticalStrut(10));
-            JSeparator sep2 = new JSeparator();
-            sep2.setMaximumSize(new Dimension(250, 1));
-            sep2.setForeground(new Color(60, 70, 80));
-            sidebar.add(sep2);
-            sidebar.add(Box.createVerticalStrut(10));
-
-            JLabel mgmtLabel = new JLabel("   MANAGEMENT");
-            mgmtLabel.setFont(new Font("Segoe UI", Font.BOLD, 11));
-            mgmtLabel.setForeground(new Color(120, 130, 140));
-            mgmtLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-            sidebar.add(mgmtLabel);
-            sidebar.add(Box.createVerticalStrut(5));
-
-            addSidebarButton(sidebar, "Add New Book", "ADD_BOOK");
-            addSidebarButton(sidebar, "Add Category", "ADD_CATEGORY");
-            addSidebarButton(sidebar, "Create Account", "CREATE_ACCOUNT");
+            addSeparator(sidebar);
+            addMenuLabel(sidebar, "MANAGEMENT");
+            addNavButton(sidebar, "Add New Book", "ADD_BOOK", contentPanel, contentLayout);
+            addNavButton(sidebar, "Add Category", "ADD_CATEGORY", contentPanel, contentLayout);
+            addNavButton(sidebar, "Create Account", "CREATE_ACCOUNT", contentPanel, contentLayout);
         }
 
         sidebar.add(Box.createVerticalGlue());
 
-        JButton logoutBtn = new JButton("Logout");
-        logoutBtn.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        logoutBtn.setForeground(ACCENT_RED);
-        logoutBtn.setBackground(SIDEBAR_COLOR);
-        logoutBtn.setBorderPainted(false);
-        logoutBtn.setFocusPainted(false);
-        logoutBtn.setContentAreaFilled(false);
-        logoutBtn.setHorizontalAlignment(SwingConstants.LEFT);
-        logoutBtn.setMaximumSize(new Dimension(250, 50));
-        logoutBtn.setBorder(BorderFactory.createEmptyBorder(10, 25, 10, 10));
-        logoutBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        logoutBtn.addMouseListener(new MouseAdapter() {
-            public void mouseEntered(MouseEvent e) { logoutBtn.setBackground(SIDEBAR_HOVER); logoutBtn.setContentAreaFilled(true); }
-            public void mouseExited(MouseEvent e) { logoutBtn.setContentAreaFilled(false); }
-        });
-        logoutBtn.addActionListener(e -> {
+        // Logout button
+        JButton logout = createSidebarBtn("Logout");
+        logout.setForeground(RED);
+        logout.addActionListener(e -> {
             currentUser = null;
-            cardLayout.show(mainPanel, "LOGIN");
+            mainLayout.show(mainPanel, "LOGIN");
         });
-        sidebar.add(logoutBtn);
+        sidebar.add(logout);
         sidebar.add(Box.createVerticalStrut(20));
 
         return sidebar;
     }
 
-    private void addSidebarButton(JPanel sidebar, String text, String cardName) {
+    // ---- Add navigation button to sidebar ----
+    private void addNavButton(JPanel sidebar, String text, String page,
+                              JPanel contentPanel, CardLayout contentLayout) {
+        JButton btn = createSidebarBtn(text);
+        btn.addActionListener(e -> {
+            // Refresh dynamic pages
+            if (page.equals("HOME")) contentPanel.add(buildHomePage(), "HOME");
+            if (page.equals("VIEW_BOOKS")) contentPanel.add(buildViewBooksPage(), "VIEW_BOOKS");
+            if (page.equals("SEARCH_BOOKS")) contentPanel.add(buildSearchPage(), "SEARCH_BOOKS");
+            contentLayout.show(contentPanel, page);
+        });
+        sidebar.add(btn);
+    }
+
+    // ==========================================================
+    //                     HOME PAGE
+    // ==========================================================
+    private JPanel buildHomePage() {
+        JPanel page = createPage();
+
+        // Welcome header
+        addPageTitle(page, "Welcome, " + currentUser.getFullName() + "!");
+        JLabel sub = new JLabel("Here's your bookshop overview");
+        sub.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        sub.setForeground(GRAY_TEXT);
+        sub.setBorder(BorderFactory.createEmptyBorder(5, 0, 20, 0));
+        sub.setAlignmentX(Component.LEFT_ALIGNMENT);
+        page.add(sub);
+
+        // Stats cards
+        int totalBooks = data.getAllBooks().size();
+        int totalStock = 0;
+        for (Book b : data.getAllBooks()) totalStock += b.getStockQuantity();
+
+        JPanel stats = new JPanel(new GridLayout(1, 4, 20, 0));
+        stats.setOpaque(false);
+        stats.setMaximumSize(new Dimension(Integer.MAX_VALUE, 130));
+        stats.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        stats.add(buildStatCard("Total Books", String.valueOf(totalBooks), BLUE));
+        stats.add(buildStatCard("Total Stock", String.valueOf(totalStock), GREEN));
+        stats.add(buildStatCard("Categories", String.valueOf(data.getAllCategories().size()), ORANGE));
+        stats.add(buildStatCard("Users", String.valueOf(data.getAllUsers().size()), PURPLE));
+        page.add(stats);
+        page.add(Box.createVerticalStrut(20));
+
+        // Books table
+        JPanel tableCard = createCard();
+        tableCard.setLayout(new BorderLayout());
+        addCardTitle(tableCard, "Recent Books in Stock");
+        tableCard.add(wrapTable(buildBookTable(data.getAllBooks())), BorderLayout.CENTER);
+        tableCard.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        // Make table card fill remaining space
+        JPanel wrapper = new JPanel(new BorderLayout());
+        wrapper.setOpaque(false);
+        wrapper.add(tableCard, BorderLayout.CENTER);
+        wrapper.setAlignmentX(Component.LEFT_ALIGNMENT);
+        page.add(wrapper);
+
+        return page;
+    }
+
+    // ---- Stat Card ----
+    private JPanel buildStatCard(String title, String value, Color color) {
+        RoundedPanel card = new RoundedPanel(15, WHITE);
+        card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
+        card.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // Color bar at top
+        JPanel bar = new JPanel() {
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g;
+                g2.setColor(color);
+                g2.fillRoundRect(0, 0, getWidth(), 4, 4, 4);
+            }
+        };
+        bar.setOpaque(false);
+        bar.setPreferredSize(new Dimension(0, 8));
+        bar.setMaximumSize(new Dimension(Integer.MAX_VALUE, 8));
+        card.add(bar);
+
+        JLabel t = new JLabel(title);
+        t.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        t.setForeground(GRAY_TEXT);
+        card.add(t);
+        card.add(Box.createVerticalStrut(10));
+
+        JLabel v = new JLabel(value);
+        v.setFont(new Font("Segoe UI", Font.BOLD, 32));
+        v.setForeground(color);
+        card.add(v);
+
+        return card;
+    }
+
+    // ==========================================================
+    //                   VIEW BOOKS PAGE
+    // ==========================================================
+    private JPanel buildViewBooksPage() {
+        JPanel page = createPage();
+        addPageTitle(page, "All Books");
+
+        JPanel card = createCard();
+        card.setLayout(new BorderLayout());
+
+        card.add(wrapTable(buildBookTable(data.getAllBooks())), BorderLayout.CENTER);
+
+        // Summary
+        int total = data.getAllBooks().size();
+        int stock = 0;
+        for (Book b : data.getAllBooks()) stock += b.getStockQuantity();
+
+        JLabel summary = new JLabel("Total: " + total + " books | " + stock + " items in stock");
+        summary.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        summary.setForeground(BLUE);
+        summary.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+        card.add(summary, BorderLayout.SOUTH);
+
+        card.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JPanel wrapper = new JPanel(new BorderLayout());
+        wrapper.setOpaque(false);
+        wrapper.add(card, BorderLayout.CENTER);
+        wrapper.setAlignmentX(Component.LEFT_ALIGNMENT);
+        page.add(wrapper);
+
+        return page;
+    }
+
+    // ==========================================================
+    //                   SEARCH BOOKS PAGE
+    // ==========================================================
+    private JPanel buildSearchPage() {
+        JPanel page = createPage();
+        addPageTitle(page, "Search Books");
+
+        JPanel card = createCard();
+        card.setLayout(new BorderLayout());
+
+        // Search controls
+        JPanel controls = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 10));
+        controls.setOpaque(false);
+
+        controls.add(makeLabel("Search By:", true));
+
+        String[] options = {"Book Name", "Category", "Max Price", "Min Stock"};
+        JComboBox<String> typeBox = new JComboBox<>(options);
+        typeBox.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        typeBox.setPreferredSize(new Dimension(150, 38));
+        controls.add(typeBox);
+
+        JTextField searchField = createTextField();
+        searchField.setPreferredSize(new Dimension(250, 38));
+        searchField.setMaximumSize(new Dimension(250, 38));
+        controls.add(searchField);
+
+        RoundedButton searchBtn = new RoundedButton("Search", BLUE);
+        searchBtn.setPreferredSize(new Dimension(120, 38));
+        controls.add(searchBtn);
+
+        RoundedButton resetBtn = new RoundedButton("Reset", GRAY_TEXT);
+        resetBtn.setPreferredSize(new Dimension(110, 38));
+        controls.add(resetBtn);
+
+        card.add(controls, BorderLayout.NORTH);
+
+        // Results area
+        JPanel resultsArea = new JPanel(new BorderLayout());
+        resultsArea.setOpaque(false);
+        resultsArea.setBorder(BorderFactory.createEmptyBorder(15, 0, 0, 0));
+
+        JLabel resultsTitle = new JLabel("Search Results:");
+        resultsTitle.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        resultsTitle.setForeground(TEXT);
+        resultsTitle.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+        resultsArea.add(resultsTitle, BorderLayout.NORTH);
+
+        JTable table = buildBookTable(data.getAllBooks());
+        JScrollPane scroll = wrapTable(table);
+        resultsArea.add(scroll, BorderLayout.CENTER);
+
+        JLabel countLabel = new JLabel("Showing " + data.getAllBooks().size() + " results");
+        countLabel.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        countLabel.setForeground(GRAY_TEXT);
+        countLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+        resultsArea.add(countLabel, BorderLayout.SOUTH);
+
+        card.add(resultsArea, BorderLayout.CENTER);
+
+        // Search action
+        ActionListener doSearch = e -> {
+            String query = searchField.getText().trim();
+            if (query.isEmpty()) {
+                showMsg("Please enter a search term.", "Search", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            try {
+                String type = (String) typeBox.getSelectedItem();
+                List<Book> results;
+
+                switch (type) {
+                    case "Category": results = data.searchByCategory(query); break;
+                    case "Max Price": results = data.searchByPrice(Double.parseDouble(query)); break;
+                    case "Min Stock": results = data.searchByStock(Integer.parseInt(query)); break;
+                    default: results = data.searchByName(query); break;
+                }
+
+                scroll.setViewportView(buildBookTable(results));
+                countLabel.setText("Showing " + results.size() + " results for \"" + query + "\"");
+                resultsTitle.setText("Search Results - " + type + ": " + query);
+            } catch (NumberFormatException ex) {
+                showMsg("Please enter a valid number.", "Invalid Input", JOptionPane.ERROR_MESSAGE);
+            }
+        };
+
+        searchBtn.addActionListener(doSearch);
+        searchField.addActionListener(doSearch);
+
+        resetBtn.addActionListener(e -> {
+            searchField.setText("");
+            scroll.setViewportView(buildBookTable(data.getAllBooks()));
+            countLabel.setText("Showing " + data.getAllBooks().size() + " results");
+            resultsTitle.setText("Search Results:");
+        });
+
+        card.setAlignmentX(Component.LEFT_ALIGNMENT);
+        JPanel wrapper = new JPanel(new BorderLayout());
+        wrapper.setOpaque(false);
+        wrapper.add(card, BorderLayout.CENTER);
+        wrapper.setAlignmentX(Component.LEFT_ALIGNMENT);
+        page.add(wrapper);
+
+        return page;
+    }
+
+    // ==========================================================
+    //              ADD BOOK PAGE (Manager Only)
+    // ==========================================================
+    private JPanel buildAddBookPage() {
+        JPanel page = createPage();
+        addPageTitle(page, "Add New Book");
+
+        RoundedPanel form = new RoundedPanel(15, WHITE);
+        form.setLayout(new GridBagLayout());
+        form.setBorder(BorderFactory.createEmptyBorder(30, 40, 30, 40));
+
+        GridBagConstraints g = new GridBagConstraints();
+        g.insets = new Insets(8, 10, 8, 10);
+        g.fill = GridBagConstraints.HORIZONTAL;
+
+        // Form fields
+        JTextField idField = createTextField();
+        idField.setText(data.generateBookId());
+        idField.setEditable(false);
+        idField.setBackground(new Color(240, 240, 240));
+
+        JTextField titleField = createTextField();
+        JTextField authorField = createTextField();
+
+        JComboBox<String> catBox = new JComboBox<>();
+        catBox.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        for (Category c : data.getAllCategories()) catBox.addItem(c.getCategoryName());
+
+        JTextField priceField = createTextField();
+        JTextField stockField = createTextField();
+
+        // Add rows
+        addRow(form, g, 0, "Book ID:", idField);
+        addRow(form, g, 1, "Book Title:", titleField);
+        addRow(form, g, 2, "Author:", authorField);
+        addRow(form, g, 3, "Category:", catBox);
+        addRow(form, g, 4, "Price (Rs.):", priceField);
+        addRow(form, g, 5, "Stock Quantity:", stockField);
+
+        // Buttons
+        JPanel btns = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
+        btns.setOpaque(false);
+
+        RoundedButton addBtn = new RoundedButton("Add Book", GREEN);
+        RoundedButton clearBtn = new RoundedButton("Clear", GRAY_TEXT);
+        btns.add(addBtn);
+        btns.add(clearBtn);
+
+        g.gridx = 0; g.gridy = 6; g.gridwidth = 2;
+        g.insets = new Insets(20, 10, 10, 10);
+        form.add(btns, g);
+
+        // Add action
+        addBtn.addActionListener(e -> {
+            try {
+                String t = titleField.getText().trim();
+                String a = authorField.getText().trim();
+                String pr = priceField.getText().trim();
+                String st = stockField.getText().trim();
+
+                if (t.isEmpty() || a.isEmpty() || pr.isEmpty() || st.isEmpty()) {
+                    showMsg("Please fill all fields!", "Validation Error", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                double price = Double.parseDouble(pr);
+                int stock = Integer.parseInt(st);
+
+                if (price <= 0 || stock < 0) {
+                    showMsg("Price must be positive and stock cannot be negative!", "Validation Error", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                data.addBook(new Book(idField.getText(), t, a, (String) catBox.getSelectedItem(), price, stock));
+                showMsg("Book \"" + t + "\" added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+
+                idField.setText(data.generateBookId());
+                titleField.setText(""); authorField.setText("");
+                priceField.setText(""); stockField.setText("");
+            } catch (NumberFormatException ex) {
+                showMsg("Please enter valid numbers for Price and Stock!", "Input Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        clearBtn.addActionListener(e -> {
+            titleField.setText(""); authorField.setText("");
+            priceField.setText(""); stockField.setText("");
+            idField.setText(data.generateBookId());
+        });
+
+        JPanel center = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        center.setOpaque(false);
+        center.add(form);
+        center.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JPanel wrapper = new JPanel(new BorderLayout());
+        wrapper.setOpaque(false);
+        wrapper.add(center, BorderLayout.CENTER);
+        wrapper.setAlignmentX(Component.LEFT_ALIGNMENT);
+        page.add(wrapper);
+
+        return page;
+    }
+
+    // ==========================================================
+    //            ADD CATEGORY PAGE (Manager Only)
+    // ==========================================================
+    private JPanel buildAddCategoryPage() {
+        JPanel page = createPage();
+        addPageTitle(page, "Add New Category");
+
+        JPanel content = new JPanel(new GridLayout(1, 2, 20, 0));
+        content.setOpaque(false);
+        content.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        // ---- Left: Form ----
+        RoundedPanel form = new RoundedPanel(15, WHITE);
+        form.setLayout(new GridBagLayout());
+        form.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
+        GridBagConstraints g = new GridBagConstraints();
+        g.insets = new Insets(8, 10, 8, 10);
+        g.fill = GridBagConstraints.HORIZONTAL;
+
+        JTextField idField = createTextField();
+        idField.setText(data.generateCategoryId());
+        idField.setEditable(false);
+        idField.setBackground(new Color(240, 240, 240));
+
+        JTextField nameField = createTextField();
+        JTextField descField = createTextField();
+
+        addRow(form, g, 0, "Category ID:", idField);
+        addRow(form, g, 1, "Category Name:", nameField);
+        addRow(form, g, 2, "Description:", descField);
+
+        JPanel btns = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
+        btns.setOpaque(false);
+        RoundedButton addBtn = new RoundedButton("Add Category", ORANGE);
+        RoundedButton clearBtn = new RoundedButton("Clear", GRAY_TEXT);
+        btns.add(addBtn);
+        btns.add(clearBtn);
+
+        g.gridx = 0; g.gridy = 3; g.gridwidth = 2;
+        g.insets = new Insets(20, 10, 10, 10);
+        form.add(btns, g);
+
+        // ---- Right: Existing categories table ----
+        RoundedPanel listCard = new RoundedPanel(15, WHITE);
+        listCard.setLayout(new BorderLayout());
+        listCard.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        addCardTitle(listCard, "Existing Categories");
+
+        String[] cols = {"ID", "Name", "Description"};
+        JScrollPane scroll = wrapTable(buildCategoryTable());
+        listCard.add(scroll, BorderLayout.CENTER);
+
+        // Actions
+        addBtn.addActionListener(e -> {
+            String name = nameField.getText().trim();
+            String desc = descField.getText().trim();
+            if (name.isEmpty() || desc.isEmpty()) {
+                showMsg("Please fill all fields!", "Validation Error", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            data.addCategory(new Category(idField.getText(), name, desc));
+            showMsg("Category \"" + name + "\" added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            idField.setText(data.generateCategoryId());
+            nameField.setText(""); descField.setText("");
+            scroll.setViewportView(buildCategoryTable());
+        });
+
+        clearBtn.addActionListener(e -> {
+            nameField.setText(""); descField.setText("");
+            idField.setText(data.generateCategoryId());
+        });
+
+        content.add(form);
+        content.add(listCard);
+
+        JPanel wrapper = new JPanel(new BorderLayout());
+        wrapper.setOpaque(false);
+        wrapper.add(content, BorderLayout.CENTER);
+        wrapper.setAlignmentX(Component.LEFT_ALIGNMENT);
+        page.add(wrapper);
+
+        return page;
+    }
+
+    // ==========================================================
+    //           CREATE ACCOUNT PAGE (Manager Only)
+    // ==========================================================
+    private JPanel buildCreateAccountPage() {
+        JPanel page = createPage();
+        addPageTitle(page, "Create New Account");
+
+        JPanel content = new JPanel(new GridLayout(1, 2, 20, 0));
+        content.setOpaque(false);
+        content.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        // ---- Left: Form ----
+        RoundedPanel form = new RoundedPanel(15, WHITE);
+        form.setLayout(new GridBagLayout());
+        form.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
+        GridBagConstraints g = new GridBagConstraints();
+        g.insets = new Insets(8, 10, 8, 10);
+        g.fill = GridBagConstraints.HORIZONTAL;
+
+        JTextField nameField = createTextField();
+        JTextField userField = createTextField();
+
+        JPasswordField passField = new JPasswordField();
+        styleTextField(passField);
+
+        JComboBox<String> roleBox = new JComboBox<>(new String[]{"Cashier", "Manager"});
+        roleBox.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+
+        addRow(form, g, 0, "Full Name:", nameField);
+        addRow(form, g, 1, "Username:", userField);
+        addRow(form, g, 2, "Password:", passField);
+        addRow(form, g, 3, "Account Type:", roleBox);
+
+        JPanel btns = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
+        btns.setOpaque(false);
+        RoundedButton createBtn = new RoundedButton("Create Account", PURPLE);
+        RoundedButton clearBtn = new RoundedButton("Clear", GRAY_TEXT);
+        btns.add(createBtn);
+        btns.add(clearBtn);
+
+        g.gridx = 0; g.gridy = 4; g.gridwidth = 2;
+        g.insets = new Insets(20, 10, 10, 10);
+        form.add(btns, g);
+
+        // ---- Right: Existing users table ----
+        RoundedPanel listCard = new RoundedPanel(15, WHITE);
+        listCard.setLayout(new BorderLayout());
+        listCard.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        addCardTitle(listCard, "Existing Users");
+
+        JScrollPane scroll = wrapTable(buildUserTable());
+        listCard.add(scroll, BorderLayout.CENTER);
+
+        // Actions
+        createBtn.addActionListener(e -> {
+            String name = nameField.getText().trim();
+            String user = userField.getText().trim();
+            String pass = new String(passField.getPassword()).trim();
+            String role = (String) roleBox.getSelectedItem();
+
+            if (name.isEmpty() || user.isEmpty() || pass.isEmpty()) {
+                showMsg("Please fill all fields!", "Validation Error", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            if (pass.length() < 6) {
+                showMsg("Password must be at least 6 characters!", "Validation Error", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            // POLYMORPHISM - creating different types based on role
+            Person newUser = role.equals("Manager") ?
+                    new Manager(user, pass, name) : new Cashier(user, pass, name);
+
+            if (data.addUser(newUser)) {
+                showMsg("Account for \"" + name + "\" (" + role + ") created!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                nameField.setText(""); userField.setText(""); passField.setText("");
+                scroll.setViewportView(buildUserTable());
+            } else {
+                showMsg("Username \"" + user + "\" already exists!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        clearBtn.addActionListener(e -> {
+            nameField.setText(""); userField.setText(""); passField.setText("");
+        });
+
+        content.add(form);
+        content.add(listCard);
+
+        JPanel wrapper = new JPanel(new BorderLayout());
+        wrapper.setOpaque(false);
+        wrapper.add(content, BorderLayout.CENTER);
+        wrapper.setAlignmentX(Component.LEFT_ALIGNMENT);
+        page.add(wrapper);
+
+        return page;
+    }
+
+    // ==========================================================
+    //              TABLE BUILDING METHODS
+    // ==========================================================
+
+    // Build a styled table for books
+    private JTable buildBookTable(List<Book> books) {
+        String[] cols = {"Book ID", "Title", "Author", "Category", "Price", "Stock"};
+        Object[][] rows = new Object[books.size()][6];
+        for (int i = 0; i < books.size(); i++) {
+            Book b = books.get(i);
+            rows[i] = new Object[]{b.getBookId(), b.getTitle(), b.getAuthor(),
+                    b.getCategory(), String.format("Rs. %.2f", b.getPrice()), b.getStockQuantity()};
+        }
+        return styleTable(new JTable(new DefaultTableModel(rows, cols) {
+            public boolean isCellEditable(int r, int c) { return false; }
+        }));
+    }
+
+    // Build a styled table for categories
+    private JTable buildCategoryTable() {
+        String[] cols = {"ID", "Name", "Description"};
+        List<Category> cats = data.getAllCategories();
+        Object[][] rows = new Object[cats.size()][3];
+        for (int i = 0; i < cats.size(); i++) {
+            Category c = cats.get(i);
+            rows[i] = new Object[]{c.getCategoryId(), c.getCategoryName(), c.getDescription()};
+        }
+        return styleTable(new JTable(new DefaultTableModel(rows, cols) {
+            public boolean isCellEditable(int r, int c) { return false; }
+        }));
+    }
+
+    // Build a styled table for users
+    private JTable buildUserTable() {
+        String[] cols = {"Username", "Full Name", "Role"};
+        List<Person> users = data.getAllUsers();
+        Object[][] rows = new Object[users.size()][3];
+        for (int i = 0; i < users.size(); i++) {
+            Person p = users.get(i);
+            rows[i] = new Object[]{p.getUsername(), p.getFullName(), p.getRole()};
+        }
+        return styleTable(new JTable(new DefaultTableModel(rows, cols) {
+            public boolean isCellEditable(int r, int c) { return false; }
+        }));
+    }
+
+    // Apply styling to any table
+    private JTable styleTable(JTable table) {
+        table.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        table.setRowHeight(40);
+        table.setShowGrid(false);
+        table.setIntercellSpacing(new Dimension(0, 0));
+        table.setSelectionBackground(new Color(232, 245, 253));
+        table.setSelectionForeground(TEXT);
+        table.setBackground(WHITE);
+
+        // Header style - bright blue with white text
+        table.getTableHeader().setDefaultRenderer(new DefaultTableCellRenderer() {
+            public Component getTableCellRendererComponent(JTable t, Object val,
+                    boolean sel, boolean focus, int row, int col) {
+                JLabel lbl = new JLabel(val != null ? val.toString() : "");
+                lbl.setFont(new Font("Segoe UI", Font.BOLD, 14));
+                lbl.setForeground(Color.WHITE);
+                lbl.setBackground(HEADER_BLUE);
+                lbl.setOpaque(true);
+                lbl.setHorizontalAlignment(SwingConstants.LEFT);
+                lbl.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createMatteBorder(0, 0, 2, 1, new Color(36, 113, 163)),
+                        BorderFactory.createEmptyBorder(10, 15, 10, 15)));
+                return lbl;
+            }
+        });
+        table.getTableHeader().setPreferredSize(new Dimension(0, 48));
+        table.getTableHeader().setReorderingAllowed(false);
+
+        // Alternating row colors
+        table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            public Component getTableCellRendererComponent(JTable t, Object val,
+                    boolean sel, boolean focus, int row, int col) {
+                Component c = super.getTableCellRendererComponent(t, val, sel, focus, row, col);
+                if (!sel) c.setBackground(row % 2 == 0 ? WHITE : new Color(245, 248, 250));
+                setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 15));
+                return c;
+            }
+        });
+
+        return table;
+    }
+
+    // Wrap table in scroll pane
+    private JScrollPane wrapTable(JTable table) {
+        JScrollPane sp = new JScrollPane(table);
+        sp.setBorder(BorderFactory.createEmptyBorder());
+        sp.getViewport().setBackground(WHITE);
+        return sp;
+    }
+
+    // ==========================================================
+    //              UI HELPER METHODS
+    // ==========================================================
+
+    // Create a standard page panel
+    private JPanel createPage() {
+        JPanel p = new JPanel();
+        p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
+        p.setBackground(LIGHT_BG);
+        p.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
+        return p;
+    }
+
+    // Create a white card panel
+    private JPanel createCard() {
+        RoundedPanel card = new RoundedPanel(15, WHITE);
+        card.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        return card;
+    }
+
+    // Add a page title
+    private void addPageTitle(JPanel page, String text) {
+        JLabel title = new JLabel(text);
+        title.setFont(new Font("Segoe UI", Font.BOLD, 26));
+        title.setForeground(TEXT);
+        title.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
+        title.setAlignmentX(Component.LEFT_ALIGNMENT);
+        page.add(title);
+    }
+
+    // Add a card title
+    private void addCardTitle(JPanel card, String text) {
+        JLabel title = new JLabel(text);
+        title.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        title.setForeground(TEXT);
+        title.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
+        card.add(title, BorderLayout.NORTH);
+    }
+
+    // Create a styled text field
+    private JTextField createTextField() {
+        JTextField field = new JTextField();
+        styleTextField(field);
+        return field;
+    }
+
+    // Apply styling to text field
+    private void styleTextField(JTextField field) {
+        field.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        field.setPreferredSize(new Dimension(300, 38));
+        field.setMaximumSize(new Dimension(300, 42));
+        field.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(200, 200, 200), 1, true),
+                BorderFactory.createEmptyBorder(5, 15, 5, 15)));
+    }
+
+    // Add a form row (label + field)
+    private void addRow(JPanel panel, GridBagConstraints g, int row, String label, JComponent field) {
+        g.gridx = 0; g.gridy = row; g.gridwidth = 1; g.weightx = 0;
+        panel.add(makeLabel(label, true), g);
+        g.gridx = 1; g.weightx = 1;
+        panel.add(field, g);
+    }
+
+    // Create a label
+    private JLabel makeLabel(String text, boolean bold) {
+        JLabel lbl = new JLabel(text);
+        lbl.setFont(new Font("Segoe UI", bold ? Font.BOLD : Font.PLAIN, 14));
+        lbl.setForeground(TEXT);
+        return lbl;
+    }
+
+    // Add a centered label
+    private void addCenteredLabel(JPanel panel, String text, Font font, Color color) {
+        JLabel lbl = new JLabel(text);
+        lbl.setFont(font);
+        lbl.setForeground(color);
+        lbl.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(lbl);
+    }
+
+    // Add a field label
+    private void addFieldLabel(JPanel panel, String text) {
+        JLabel lbl = new JLabel("  " + text);
+        lbl.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lbl.setForeground(TEXT);
+        lbl.setAlignmentX(Component.CENTER_ALIGNMENT);
+        lbl.setMaximumSize(new Dimension(300, 20));
+        panel.add(lbl);
+        panel.add(Box.createVerticalStrut(5));
+    }
+
+    // Create a sidebar button
+    private JButton createSidebarBtn(String text) {
         JButton btn = new JButton(text);
         btn.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         btn.setForeground(new Color(200, 200, 200));
-        btn.setBackground(SIDEBAR_COLOR);
+        btn.setBackground(SIDEBAR);
         btn.setBorderPainted(false);
         btn.setFocusPainted(false);
         btn.setContentAreaFilled(false);
@@ -863,7 +1392,7 @@ public class CityBookshop extends JFrame {
 
         btn.addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent e) {
-                btn.setBackground(SIDEBAR_HOVER);
+                btn.setBackground(SIDEBAR_HL);
                 btn.setContentAreaFilled(true);
                 btn.setForeground(Color.WHITE);
             }
@@ -872,811 +1401,49 @@ public class CityBookshop extends JFrame {
                 btn.setForeground(new Color(200, 200, 200));
             }
         });
-
-        btn.addActionListener(e -> {
-            Container parent = sidebar.getParent();
-            if (parent instanceof JPanel) {
-                JPanel contentPanel = (JPanel) ((JPanel) parent).getClientProperty("contentPanel");
-                CardLayout cl = (CardLayout) ((JPanel) parent).getClientProperty("contentLayout");
-                if (contentPanel != null && cl != null) {
-                    if (cardName.equals("VIEW_BOOKS")) {
-                        contentPanel.add(createViewBooksContent(), "VIEW_BOOKS");
-                    } else if (cardName.equals("SEARCH_BOOKS")) {
-                        contentPanel.add(createSearchBooksContent(), "SEARCH_BOOKS");
-                    } else if (cardName.equals("HOME")) {
-                        contentPanel.add(createHomeContent(), "HOME");
-                    }
-                    cl.show(contentPanel, cardName);
-                }
-            }
-        });
-
-        sidebar.add(btn);
+        return btn;
     }
 
-    // ============================================================
-    // HOME CONTENT
-    // ============================================================
-    private JPanel createHomeContent() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(BG_WHITE);
-        panel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
-
-        JPanel headerPanel = new JPanel(new BorderLayout());
-        headerPanel.setBackground(BG_WHITE);
-
-        JLabel welcomeLabel = new JLabel("Welcome, " + currentUser.getFullName() + "!");
-        welcomeLabel.setFont(new Font("Segoe UI", Font.BOLD, 26));
-        welcomeLabel.setForeground(TEXT_DARK);
-        headerPanel.add(welcomeLabel, BorderLayout.NORTH);
-
-        JLabel subtitleLabel = new JLabel("Here's your bookshop overview");
-        subtitleLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        subtitleLabel.setForeground(TEXT_LIGHT);
-        subtitleLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 20, 0));
-        headerPanel.add(subtitleLabel, BorderLayout.CENTER);
-
-        panel.add(headerPanel, BorderLayout.NORTH);
-
-        JPanel statsPanel = new JPanel(new GridLayout(1, 4, 20, 0));
-        statsPanel.setBackground(BG_WHITE);
-        statsPanel.setPreferredSize(new Dimension(0, 140));
-
-        int totalBooks = dataManager.getAllBooks().size();
-        int totalStock = 0;
-        int totalCategories = dataManager.getAllCategories().size();
-        int totalUsers = dataManager.getAllUsers().size();
-        for (Book b : dataManager.getAllBooks()) totalStock += b.getStockQuantity();
-
-        statsPanel.add(createStatCard("Total Books", String.valueOf(totalBooks), ACCENT_BLUE));
-        statsPanel.add(createStatCard("Total Stock", String.valueOf(totalStock), ACCENT_GREEN));
-        statsPanel.add(createStatCard("Categories", String.valueOf(totalCategories), ACCENT_ORANGE));
-        statsPanel.add(createStatCard("Users", String.valueOf(totalUsers), ACCENT_PURPLE));
-
-        JPanel centerPanel = new JPanel(new BorderLayout());
-        centerPanel.setBackground(BG_WHITE);
-        centerPanel.add(statsPanel, BorderLayout.NORTH);
-
-        RoundedPanel recentPanel = new RoundedPanel(15, CARD_WHITE);
-        recentPanel.setLayout(new BorderLayout());
-        recentPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
-        JLabel recentTitle = new JLabel("Recent Books in Stock");
-        recentTitle.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        recentTitle.setForeground(TEXT_DARK);
-        recentTitle.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
-        recentPanel.add(recentTitle, BorderLayout.NORTH);
-
-        JTable recentTable = createStyledTable(getBookTableData(dataManager.getAllBooks()));
-        JScrollPane scrollPane = new JScrollPane(recentTable);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
-        scrollPane.getViewport().setBackground(CARD_WHITE);
-        recentPanel.add(scrollPane, BorderLayout.CENTER);
-
-        JPanel tableWrapper = new JPanel(new BorderLayout());
-        tableWrapper.setBackground(BG_WHITE);
-        tableWrapper.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
-        tableWrapper.add(recentPanel, BorderLayout.CENTER);
-
-        centerPanel.add(tableWrapper, BorderLayout.CENTER);
-        panel.add(centerPanel, BorderLayout.CENTER);
-
-        return panel;
+    // Add a separator line to sidebar
+    private void addSeparator(JPanel sidebar) {
+        JSeparator sep = new JSeparator();
+        sep.setMaximumSize(new Dimension(250, 1));
+        sep.setForeground(new Color(60, 70, 80));
+        sidebar.add(sep);
+        sidebar.add(Box.createVerticalStrut(10));
     }
 
-    private JPanel createStatCard(String title, String value, Color color) {
-        RoundedPanel card = new RoundedPanel(15, CARD_WHITE);
-        card.setLayout(new BorderLayout());
-        card.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
-        JPanel contentPanel = new JPanel();
-        contentPanel.setOpaque(false);
-        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
-
-        JLabel titleLabel = new JLabel(title);
-        titleLabel.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        titleLabel.setForeground(TEXT_LIGHT);
-        titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        JLabel valueLabel = new JLabel(value);
-        valueLabel.setFont(new Font("Segoe UI", Font.BOLD, 32));
-        valueLabel.setForeground(color);
-        valueLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        contentPanel.add(titleLabel);
-        contentPanel.add(Box.createVerticalStrut(10));
-        contentPanel.add(valueLabel);
-
-        JPanel indicator = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g;
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(color);
-                g2.fillRoundRect(0, 0, getWidth(), 4, 4, 4);
-            }
-        };
-        indicator.setOpaque(false);
-        indicator.setPreferredSize(new Dimension(0, 8));
-
-        card.add(indicator, BorderLayout.NORTH);
-        card.add(contentPanel, BorderLayout.CENTER);
-
-        return card;
+    // Add a menu section label to sidebar
+    private void addMenuLabel(JPanel sidebar, String text) {
+        JLabel lbl = new JLabel("   " + text);
+        lbl.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lbl.setForeground(new Color(120, 130, 140));
+        sidebar.add(lbl);
+        sidebar.add(Box.createVerticalStrut(5));
     }
 
-    // ============================================================
-    // VIEW BOOKS CONTENT
-    // ============================================================
-    private JPanel createViewBooksContent() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(BG_WHITE);
-        panel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
-
-        JLabel title = new JLabel("All Books");
-        title.setFont(new Font("Segoe UI", Font.BOLD, 26));
-        title.setForeground(TEXT_DARK);
-        title.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
-        panel.add(title, BorderLayout.NORTH);
-
-        RoundedPanel tablePanel = new RoundedPanel(15, CARD_WHITE);
-        tablePanel.setLayout(new BorderLayout());
-        tablePanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
-        JTable table = createStyledTable(getBookTableData(dataManager.getAllBooks()));
-        JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
-        scrollPane.getViewport().setBackground(CARD_WHITE);
-        tablePanel.add(scrollPane, BorderLayout.CENTER);
-
-        JPanel summaryPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 10));
-        summaryPanel.setOpaque(false);
-        int totalBooks = dataManager.getAllBooks().size();
-        int totalStock = 0;
-        for (Book b : dataManager.getAllBooks()) totalStock += b.getStockQuantity();
-
-        JLabel summaryLabel = new JLabel("Total: " + totalBooks + " books | " + totalStock + " items in stock");
-        summaryLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        summaryLabel.setForeground(ACCENT_BLUE);
-        summaryPanel.add(summaryLabel);
-        tablePanel.add(summaryPanel, BorderLayout.SOUTH);
-
-        panel.add(tablePanel, BorderLayout.CENTER);
-        return panel;
+    // Draw centered text helper
+    private void drawCentered(Graphics2D g2, String text, int width, int y) {
+        FontMetrics fm = g2.getFontMetrics();
+        g2.drawString(text, (width - fm.stringWidth(text)) / 2, y);
     }
 
-    // ============================================================
-    // SEARCH BOOKS CONTENT
-    // ============================================================
-    private JPanel createSearchBooksContent() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(BG_WHITE);
-        panel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
-
-        JLabel title = new JLabel("Search Books");
-        title.setFont(new Font("Segoe UI", Font.BOLD, 26));
-        title.setForeground(TEXT_DARK);
-        title.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
-        panel.add(title, BorderLayout.NORTH);
-
-        RoundedPanel searchPanel = new RoundedPanel(15, CARD_WHITE);
-        searchPanel.setLayout(new BorderLayout());
-        searchPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
-        JPanel controlsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 10));
-        controlsPanel.setOpaque(false);
-
-        JLabel searchTypeLabel = new JLabel("Search By:");
-        searchTypeLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        searchTypeLabel.setForeground(TEXT_DARK);
-        controlsPanel.add(searchTypeLabel);
-
-        String[] searchOptions = {"Book Name", "Category", "Max Price", "Min Stock"};
-        JComboBox<String> searchTypeCombo = new JComboBox<>(searchOptions);
-        searchTypeCombo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        searchTypeCombo.setPreferredSize(new Dimension(150, 38));
-        searchTypeCombo.setBackground(CARD_WHITE);
-        controlsPanel.add(searchTypeCombo);
-
-        JTextField searchField = new JTextField(20);
-        searchField.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        searchField.setPreferredSize(new Dimension(250, 38));
-        searchField.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(200, 200, 200), 1, true),
-                BorderFactory.createEmptyBorder(5, 15, 5, 15)));
-        controlsPanel.add(searchField);
-
-        RoundedButton searchBtn = new RoundedButton("Search", ACCENT_BLUE);
-        searchBtn.setPreferredSize(new Dimension(130, 38));
-        controlsPanel.add(searchBtn);
-
-        RoundedButton resetBtn = new RoundedButton("Reset", TEXT_LIGHT);
-        resetBtn.setPreferredSize(new Dimension(120, 38));
-        controlsPanel.add(resetBtn);
-
-        searchPanel.add(controlsPanel, BorderLayout.NORTH);
-
-        JPanel resultsPanel = new JPanel(new BorderLayout());
-        resultsPanel.setOpaque(false);
-        resultsPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 0, 0));
-
-        JLabel resultsLabel = new JLabel("Search Results:");
-        resultsLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        resultsLabel.setForeground(TEXT_DARK);
-        resultsLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
-        resultsPanel.add(resultsLabel, BorderLayout.NORTH);
-
-        JTable resultsTable = createStyledTable(getBookTableData(dataManager.getAllBooks()));
-        JScrollPane scrollPane = new JScrollPane(resultsTable);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
-        scrollPane.getViewport().setBackground(CARD_WHITE);
-        resultsPanel.add(scrollPane, BorderLayout.CENTER);
-
-        JLabel countLabel = new JLabel("Showing " + dataManager.getAllBooks().size() + " results");
-        countLabel.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        countLabel.setForeground(TEXT_LIGHT);
-        countLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
-        resultsPanel.add(countLabel, BorderLayout.SOUTH);
-
-        searchPanel.add(resultsPanel, BorderLayout.CENTER);
-
-        searchBtn.addActionListener(e -> {
-            String query = searchField.getText().trim();
-            if (query.isEmpty()) {
-                showStyledMessage("Please enter a search term.", "Search", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            List<Book> results;
-            String type = (String) searchTypeCombo.getSelectedItem();
-
-            try {
-                switch (type) {
-                    case "Category":
-                        results = dataManager.searchByCategory(query);
-                        break;
-                    case "Max Price":
-                        results = dataManager.searchByPrice(Double.parseDouble(query));
-                        break;
-                    case "Min Stock":
-                        results = dataManager.searchByStock(Integer.parseInt(query));
-                        break;
-                    default:
-                        results = dataManager.searchByName(query);
-                        break;
-                }
-
-                JTable newTable = createStyledTable(getBookTableData(results));
-                scrollPane.setViewportView(newTable);
-                countLabel.setText("Showing " + results.size() + " results for \"" + query + "\"");
-                resultsLabel.setText("Search Results - " + type + ": " + query);
-
-            } catch (NumberFormatException ex) {
-                showStyledMessage("Please enter a valid number for price or stock search.", "Invalid Input", JOptionPane.ERROR_MESSAGE);
-            }
-        });
-
-        resetBtn.addActionListener(e -> {
-            searchField.setText("");
-            JTable newTable = createStyledTable(getBookTableData(dataManager.getAllBooks()));
-            scrollPane.setViewportView(newTable);
-            countLabel.setText("Showing " + dataManager.getAllBooks().size() + " results");
-            resultsLabel.setText("Search Results:");
-        });
-
-        searchField.addActionListener(e -> searchBtn.doClick());
-
-        panel.add(searchPanel, BorderLayout.CENTER);
-        return panel;
-    }
-
-    // ============================================================
-    // ADD BOOK CONTENT (Manager Only)
-    // ============================================================
-    private JPanel createAddBookContent() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(BG_WHITE);
-        panel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
-
-        JLabel title = new JLabel("Add New Book");
-        title.setFont(new Font("Segoe UI", Font.BOLD, 26));
-        title.setForeground(TEXT_DARK);
-        title.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
-        panel.add(title, BorderLayout.NORTH);
-
-        RoundedPanel formPanel = new RoundedPanel(15, CARD_WHITE);
-        formPanel.setLayout(new GridBagLayout());
-        formPanel.setBorder(BorderFactory.createEmptyBorder(30, 40, 30, 40));
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(8, 10, 8, 10);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-
-        JTextField bookIdField = createStyledTextField();
-        bookIdField.setText(dataManager.generateBookId());
-        bookIdField.setEditable(false);
-        bookIdField.setBackground(new Color(240, 240, 240));
-
-        JTextField titleField = createStyledTextField();
-        JTextField authorField = createStyledTextField();
-
-        JComboBox<String> categoryCombo = new JComboBox<>();
-        categoryCombo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        categoryCombo.setPreferredSize(new Dimension(300, 38));
-        for (Category cat : dataManager.getAllCategories()) {
-            categoryCombo.addItem(cat.getCategoryName());
-        }
-
-        JTextField priceField = createStyledTextField();
-        JTextField stockField = createStyledTextField();
-
-        addFormRow(formPanel, gbc, 0, "Book ID:", bookIdField);
-        addFormRow(formPanel, gbc, 1, "Book Title:", titleField);
-        addFormRow(formPanel, gbc, 2, "Author:", authorField);
-
-        gbc.gridx = 0; gbc.gridy = 3; gbc.gridwidth = 1; gbc.weightx = 0;
-        JLabel catLabel = new JLabel("Category:");
-        catLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        catLabel.setForeground(TEXT_DARK);
-        formPanel.add(catLabel, gbc);
-        gbc.gridx = 1; gbc.weightx = 1;
-        formPanel.add(categoryCombo, gbc);
-
-        addFormRow(formPanel, gbc, 4, "Price (Rs.):", priceField);
-        addFormRow(formPanel, gbc, 5, "Stock Quantity:", stockField);
-
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
-        buttonPanel.setOpaque(false);
-
-        RoundedButton addBtn = new RoundedButton("Add Book", ACCENT_GREEN);
-        RoundedButton clearBtn = new RoundedButton("Clear", TEXT_LIGHT);
-
-        buttonPanel.add(addBtn);
-        buttonPanel.add(clearBtn);
-
-        gbc.gridx = 0; gbc.gridy = 6; gbc.gridwidth = 2;
-        gbc.insets = new Insets(20, 10, 10, 10);
-        formPanel.add(buttonPanel, gbc);
-
-        addBtn.addActionListener(e -> {
-            try {
-                String bookTitle = titleField.getText().trim();
-                String author = authorField.getText().trim();
-                String category = (String) categoryCombo.getSelectedItem();
-                String priceText = priceField.getText().trim();
-                String stockText = stockField.getText().trim();
-
-                if (bookTitle.isEmpty() || author.isEmpty() || priceText.isEmpty() || stockText.isEmpty()) {
-                    showStyledMessage("Please fill all fields!", "Validation Error", JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
-
-                double price = Double.parseDouble(priceText);
-                int stock = Integer.parseInt(stockText);
-
-                if (price <= 0 || stock < 0) {
-                    showStyledMessage("Price must be positive and stock cannot be negative!", "Validation Error", JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
-
-                Book book = new Book(bookIdField.getText(), bookTitle, author, category, price, stock);
-                dataManager.addBook(book);
-
-                showStyledMessage("Book \"" + bookTitle + "\" added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-
-                bookIdField.setText(dataManager.generateBookId());
-                titleField.setText("");
-                authorField.setText("");
-                priceField.setText("");
-                stockField.setText("");
-
-            } catch (NumberFormatException ex) {
-                showStyledMessage("Please enter valid numbers for Price and Stock!", "Input Error", JOptionPane.ERROR_MESSAGE);
-            }
-        });
-
-        clearBtn.addActionListener(e -> {
-            titleField.setText("");
-            authorField.setText("");
-            priceField.setText("");
-            stockField.setText("");
-            bookIdField.setText(dataManager.generateBookId());
-        });
-
-        JPanel centerWrapper = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        centerWrapper.setBackground(BG_WHITE);
-        centerWrapper.add(formPanel);
-        panel.add(centerWrapper, BorderLayout.CENTER);
-
-        return panel;
-    }
-
-    // ============================================================
-    // ADD CATEGORY CONTENT (Manager Only)
-    // ============================================================
-    private JPanel createAddCategoryContent() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(BG_WHITE);
-        panel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
-
-        JLabel title = new JLabel("Add New Category");
-        title.setFont(new Font("Segoe UI", Font.BOLD, 26));
-        title.setForeground(TEXT_DARK);
-        title.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
-        panel.add(title, BorderLayout.NORTH);
-
-        JPanel contentWrapper = new JPanel(new GridLayout(1, 2, 20, 0));
-        contentWrapper.setBackground(BG_WHITE);
-
-        RoundedPanel formPanel = new RoundedPanel(15, CARD_WHITE);
-        formPanel.setLayout(new GridBagLayout());
-        formPanel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(8, 10, 8, 10);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-
-        JTextField catIdField = createStyledTextField();
-        catIdField.setText(dataManager.generateCategoryId());
-        catIdField.setEditable(false);
-        catIdField.setBackground(new Color(240, 240, 240));
-
-        JTextField catNameField = createStyledTextField();
-        JTextField descField = createStyledTextField();
-
-        addFormRow(formPanel, gbc, 0, "Category ID:", catIdField);
-        addFormRow(formPanel, gbc, 1, "Category Name:", catNameField);
-        addFormRow(formPanel, gbc, 2, "Description:", descField);
-
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
-        buttonPanel.setOpaque(false);
-
-        RoundedButton addBtn = new RoundedButton("Add Category", ACCENT_ORANGE);
-        RoundedButton clearBtn = new RoundedButton("Clear", TEXT_LIGHT);
-        buttonPanel.add(addBtn);
-        buttonPanel.add(clearBtn);
-
-        gbc.gridx = 0; gbc.gridy = 3; gbc.gridwidth = 2;
-        gbc.insets = new Insets(20, 10, 10, 10);
-        formPanel.add(buttonPanel, gbc);
-
-        RoundedPanel listPanel = new RoundedPanel(15, CARD_WHITE);
-        listPanel.setLayout(new BorderLayout());
-        listPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
-        JLabel listTitle = new JLabel("Existing Categories");
-        listTitle.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        listTitle.setForeground(TEXT_DARK);
-        listTitle.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
-        listPanel.add(listTitle, BorderLayout.NORTH);
-
-        String[] catColumns = {"ID", "Name", "Description"};
-        List<Category> cats = dataManager.getAllCategories();
-        Object[][] catData = new Object[cats.size()][3];
-        for (int i = 0; i < cats.size(); i++) {
-            catData[i][0] = cats.get(i).getCategoryId();
-            catData[i][1] = cats.get(i).getCategoryName();
-            catData[i][2] = cats.get(i).getDescription();
-        }
-        JTable catTable = createStyledTableCustom(catData, catColumns);
-        JScrollPane scrollPane = new JScrollPane(catTable);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
-        scrollPane.getViewport().setBackground(CARD_WHITE);
-        listPanel.add(scrollPane, BorderLayout.CENTER);
-
-        addBtn.addActionListener(e -> {
-            String name = catNameField.getText().trim();
-            String desc = descField.getText().trim();
-            if (name.isEmpty() || desc.isEmpty()) {
-                showStyledMessage("Please fill all fields!", "Validation Error", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-            Category category = new Category(catIdField.getText(), name, desc);
-            dataManager.addCategory(category);
-            showStyledMessage("Category \"" + name + "\" added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-            catIdField.setText(dataManager.generateCategoryId());
-            catNameField.setText("");
-            descField.setText("");
-
-            List<Category> updatedCats = dataManager.getAllCategories();
-            Object[][] newData = new Object[updatedCats.size()][3];
-            for (int i = 0; i < updatedCats.size(); i++) {
-                newData[i][0] = updatedCats.get(i).getCategoryId();
-                newData[i][1] = updatedCats.get(i).getCategoryName();
-                newData[i][2] = updatedCats.get(i).getDescription();
-            }
-            JTable newTable = createStyledTableCustom(newData, catColumns);
-            scrollPane.setViewportView(newTable);
-        });
-
-        clearBtn.addActionListener(e -> {
-            catNameField.setText("");
-            descField.setText("");
-            catIdField.setText(dataManager.generateCategoryId());
-        });
-
-        contentWrapper.add(formPanel);
-        contentWrapper.add(listPanel);
-        panel.add(contentWrapper, BorderLayout.CENTER);
-
-        return panel;
-    }
-
-    // ============================================================
-    // CREATE ACCOUNT CONTENT (Manager Only)
-    // ============================================================
-    private JPanel createCreateAccountContent() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(BG_WHITE);
-        panel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
-
-        JLabel title = new JLabel("Create New Account");
-        title.setFont(new Font("Segoe UI", Font.BOLD, 26));
-        title.setForeground(TEXT_DARK);
-        title.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
-        panel.add(title, BorderLayout.NORTH);
-
-        JPanel contentWrapper = new JPanel(new GridLayout(1, 2, 20, 0));
-        contentWrapper.setBackground(BG_WHITE);
-
-        RoundedPanel formPanel = new RoundedPanel(15, CARD_WHITE);
-        formPanel.setLayout(new GridBagLayout());
-        formPanel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(8, 10, 8, 10);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-
-        JTextField fullNameField = createStyledTextField();
-        JTextField usernameField = createStyledTextField();
-        JPasswordField passwordField = new JPasswordField();
-        passwordField.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        passwordField.setPreferredSize(new Dimension(300, 38));
-        passwordField.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(200, 200, 200), 1, true),
-                BorderFactory.createEmptyBorder(5, 15, 5, 15)));
-
-        JComboBox<String> roleCombo = new JComboBox<>(new String[]{"Cashier", "Manager"});
-        roleCombo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        roleCombo.setPreferredSize(new Dimension(300, 38));
-
-        addFormRow(formPanel, gbc, 0, "Full Name:", fullNameField);
-        addFormRow(formPanel, gbc, 1, "Username:", usernameField);
-
-        gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 1; gbc.weightx = 0;
-        JLabel passLabel = new JLabel("Password:");
-        passLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        passLabel.setForeground(TEXT_DARK);
-        formPanel.add(passLabel, gbc);
-        gbc.gridx = 1; gbc.weightx = 1;
-        formPanel.add(passwordField, gbc);
-
-        gbc.gridx = 0; gbc.gridy = 3; gbc.gridwidth = 1; gbc.weightx = 0;
-        JLabel roleLabel = new JLabel("Account Type:");
-        roleLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        roleLabel.setForeground(TEXT_DARK);
-        formPanel.add(roleLabel, gbc);
-        gbc.gridx = 1; gbc.weightx = 1;
-        formPanel.add(roleCombo, gbc);
-
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
-        buttonPanel.setOpaque(false);
-
-        RoundedButton createBtn = new RoundedButton("Create Account", ACCENT_PURPLE);
-        RoundedButton clearBtn = new RoundedButton("Clear", TEXT_LIGHT);
-        buttonPanel.add(createBtn);
-        buttonPanel.add(clearBtn);
-
-        gbc.gridx = 0; gbc.gridy = 4; gbc.gridwidth = 2;
-        gbc.insets = new Insets(20, 10, 10, 10);
-        formPanel.add(buttonPanel, gbc);
-
-        RoundedPanel listPanel = new RoundedPanel(15, CARD_WHITE);
-        listPanel.setLayout(new BorderLayout());
-        listPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
-        JLabel listTitle = new JLabel("Existing Users");
-        listTitle.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        listTitle.setForeground(TEXT_DARK);
-        listTitle.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
-        listPanel.add(listTitle, BorderLayout.NORTH);
-
-        String[] userColumns = {"Username", "Full Name", "Role"};
-        List<Person> userList = dataManager.getAllUsers();
-        Object[][] userData = new Object[userList.size()][3];
-        for (int i = 0; i < userList.size(); i++) {
-            userData[i][0] = userList.get(i).getUsername();
-            userData[i][1] = userList.get(i).getFullName();
-            userData[i][2] = userList.get(i).getRole();
-        }
-        JTable userTable = createStyledTableCustom(userData, userColumns);
-        JScrollPane scrollPane = new JScrollPane(userTable);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
-        scrollPane.getViewport().setBackground(CARD_WHITE);
-        listPanel.add(scrollPane, BorderLayout.CENTER);
-
-        createBtn.addActionListener(e -> {
-            String fullName = fullNameField.getText().trim();
-            String username = usernameField.getText().trim();
-            String password = new String(passwordField.getPassword()).trim();
-            String role = (String) roleCombo.getSelectedItem();
-
-            if (fullName.isEmpty() || username.isEmpty() || password.isEmpty()) {
-                showStyledMessage("Please fill all fields!", "Validation Error", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            if (password.length() < 6) {
-                showStyledMessage("Password must be at least 6 characters!", "Validation Error", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            Person newUser;
-            if (role.equals("Manager")) {
-                newUser = new Manager(username, password, fullName);
-            } else {
-                newUser = new Cashier(username, password, fullName);
-            }
-
-            if (dataManager.addUser(newUser)) {
-                showStyledMessage("Account for \"" + fullName + "\" (" + role + ") created successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-                fullNameField.setText("");
-                usernameField.setText("");
-                passwordField.setText("");
-
-                List<Person> updatedUsers = dataManager.getAllUsers();
-                Object[][] newData = new Object[updatedUsers.size()][3];
-                for (int i = 0; i < updatedUsers.size(); i++) {
-                    newData[i][0] = updatedUsers.get(i).getUsername();
-                    newData[i][1] = updatedUsers.get(i).getFullName();
-                    newData[i][2] = updatedUsers.get(i).getRole();
-                }
-                JTable newTable = createStyledTableCustom(newData, userColumns);
-                scrollPane.setViewportView(newTable);
-            } else {
-                showStyledMessage("Username \"" + username + "\" already exists!", "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        });
-
-        clearBtn.addActionListener(e -> {
-            fullNameField.setText("");
-            usernameField.setText("");
-            passwordField.setText("");
-        });
-
-        contentWrapper.add(formPanel);
-        contentWrapper.add(listPanel);
-        panel.add(contentWrapper, BorderLayout.CENTER);
-
-        return panel;
-    }
-
-    // ============================================================
-    // HELPER METHODS
-    // ============================================================
-
-    private JTextField createStyledTextField() {
-        JTextField field = new JTextField();
-        field.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        field.setPreferredSize(new Dimension(300, 38));
-        field.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(200, 200, 200), 1, true),
-                BorderFactory.createEmptyBorder(5, 15, 5, 15)));
-        return field;
-    }
-
-    private void addFormRow(JPanel panel, GridBagConstraints gbc, int row, String labelText, JComponent field) {
-        gbc.gridx = 0;
-        gbc.gridy = row;
-        gbc.gridwidth = 1;
-        gbc.weightx = 0;
-        JLabel label = new JLabel(labelText);
-        label.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        label.setForeground(TEXT_DARK);
-        panel.add(label, gbc);
-
-        gbc.gridx = 1;
-        gbc.weightx = 1;
-        panel.add(field, gbc);
-    }
-
-    private Object[][] getBookTableData(List<Book> books) {
-        Object[][] data = new Object[books.size()][6];
-        for (int i = 0; i < books.size(); i++) {
-            Book b = books.get(i);
-            data[i][0] = b.getBookId();
-            data[i][1] = b.getTitle();
-            data[i][2] = b.getAuthor();
-            data[i][3] = b.getCategory();
-            data[i][4] = String.format("Rs. %.2f", b.getPrice());
-            data[i][5] = b.getStockQuantity();
-        }
-        return data;
-    }
-
-    private JTable createStyledTable(Object[][] data) {
-        String[] columns = {"Book ID", "Title", "Author", "Category", "Price", "Stock"};
-        return createStyledTableCustom(data, columns);
-    }
-
-    private JTable createStyledTableCustom(Object[][] data, String[] columns) {
-        DefaultTableModel model = new DefaultTableModel(data, columns) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        };
-
-        JTable table = new JTable(model);
-        table.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        table.setRowHeight(40);
-        table.setShowGrid(false);
-        table.setIntercellSpacing(new Dimension(0, 0));
-        table.setSelectionBackground(new Color(232, 245, 253));
-        table.setSelectionForeground(TEXT_DARK);
-        table.setBackground(CARD_WHITE);
-        table.setForeground(TEXT_DARK);
-
-        // ---- FIXED: Custom header renderer for clear visibility ----
-        JTableHeader header = table.getTableHeader();
-        header.setDefaultRenderer(new DefaultTableCellRenderer() {
-            @Override
-            public Component getTableCellRendererComponent(JTable table, Object value,
-                    boolean isSelected, boolean hasFocus, int row, int column) {
-                JLabel label = new JLabel(value != null ? value.toString() : "");
-                label.setFont(new Font("Segoe UI", Font.BOLD, 14));
-                label.setForeground(TABLE_HEADER_FG);
-                label.setBackground(TABLE_HEADER_BG);
-                label.setOpaque(true);
-                label.setHorizontalAlignment(SwingConstants.LEFT);
-                label.setBorder(BorderFactory.createCompoundBorder(
-                        BorderFactory.createMatteBorder(0, 0, 2, 1, new Color(36, 113, 163)),
-                        BorderFactory.createEmptyBorder(10, 15, 10, 15)));
-                return label;
-            }
-        });
-        header.setPreferredSize(new Dimension(0, 48));
-        header.setReorderingAllowed(false);
-
-        // Alternating row colors
-        table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
-            @Override
-            public Component getTableCellRendererComponent(JTable table, Object value,
-                    boolean isSelected, boolean hasFocus, int row, int column) {
-                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                if (!isSelected) {
-                    c.setBackground(row % 2 == 0 ? CARD_WHITE : new Color(245, 248, 250));
-                }
-                setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 15));
-                return c;
-            }
-        });
-
-        table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-
-        return table;
-    }
-
-    private void showStyledMessage(String message, String title, int messageType) {
-        UIManager.put("OptionPane.background", CARD_WHITE);
-        UIManager.put("Panel.background", CARD_WHITE);
+    // Show styled message dialog
+    private void showMsg(String msg, String title, int type) {
+        UIManager.put("OptionPane.background", WHITE);
+        UIManager.put("Panel.background", WHITE);
         UIManager.put("OptionPane.messageFont", new Font("Segoe UI", Font.PLAIN, 14));
-        UIManager.put("OptionPane.buttonFont", new Font("Segoe UI", Font.BOLD, 13));
-        JOptionPane.showMessageDialog(this, message, title, messageType);
+        JOptionPane.showMessageDialog(this, msg, title, type);
     }
 
-    // ============================================================
-    // MAIN METHOD
-    // ============================================================
+    // ==========================================================
+    //                     MAIN METHOD
+    // ==========================================================
     public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            UIManager.put("Button.arc", 10);
-            UIManager.put("Component.arc", 10);
-            UIManager.put("TextComponent.arc", 10);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception e) { e.printStackTrace(); }
 
-        SwingUtilities.invokeLater(() -> {
-            new CityBookshop();
-        });
+        SwingUtilities.invokeLater(() -> new CityBookshop());
     }
 }
