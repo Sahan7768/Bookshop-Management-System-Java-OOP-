@@ -1,2 +1,3 @@
-admin,admin123,Manager
-cashier,cash123,Cashier
+Role,Username,Password,FullName
+Manager,manager,manager123,Kavindu Sahan
+Cashier,cashier,cashier123,Cashier 01
